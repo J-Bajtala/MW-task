@@ -80,13 +80,25 @@ function randomIntFromRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min)
 };
 
-function distance(x1, y1, x2, y2) {
+let dist = function distance(x1, y1, x2, y2) {
     const xDist = x2 - x1;
     const yDist = y2 - y1;
 
     return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
 
 };
+let minDist = 150;
+
+function getLineAlpha(dist, minDist){
+    //linear y = (ax + b)
+    var a = (1 / minDist) * -1,
+        b = 1, //max opacity (1.0)
+        x = dist;
+    
+    return (a * x) + b;
+};
+
+
 
 // single particle
 
@@ -101,34 +113,38 @@ function Particle(x, y, radius, color) {
     this.color = color;
     this.mass = 2;
 
+    
+
     this.update = particles => {
         this.draw();
 
         for (let i = 0; i < particles.length; i++) {
-             
+            
             if (this === particles[i]) continue;
 
             //collision check
-
-            if (distance(this.x, this.y, particles[i].x, particles[i].y) - this.radius * 2 < 0) {
+            if (dist(this.x, this.y, particles[i].x, particles[i].y) - this.radius * 2 < 0) {
                 resolveCollision(this, particles[i]);
             }
 
-            // drawing lines? - not working properly
-            
-            if (distance(this.x, this.y, particles[i].x, particles[i].y)< 150) {
-                
-                
+            // drawing lines
+            const distance = dist(this.x, this.y, particles[i].x, particles[i].y);
+            if (distance < 150) {
+                c.beginPath(); 
+                c.strokeStyle = `rgba(255, 255, 255, ${getLineAlpha(distance, minDist)})`;
+                // c.globalAlpha = getLineAlpha(distance, minDist);
+                c.moveTo(this.x, this.y)
                 c.lineTo(particles[i].x, particles[i].y)
-                c.lineWidth = 1;
-                c.strokeStyle = "red";
+                c.lineWidth = 2;
                 c.stroke();
-                c.closePath();
+                c.closePath()
             };
+            
         
     }
         
-
+    // protection from leaving the canvas
+        
         if (this.x - this.radius <= 0 || this.x + this.radius >= innerWidth) {
             this.velocity.x = -this.velocity.x;
         };
@@ -153,20 +169,24 @@ function Particle(x, y, radius, color) {
     };
 }
 
+// creating varoius particles
+
 let particles;
 
 function init () {
     particles = [];
+    const canvas = document.querySelector('canvas');
 
     for (let i = 0; i < 30; i++) {
         const radius = (Math.random() + 1) * 10; 
         let x = randomIntFromRange(radius, canvas.width - radius);
         let y = randomIntFromRange(radius, canvas.height - radius);
         const color = 'blue';
+        
 
         if (i !== 0) {
             for (let j = 0; j < particles.length; j++) {
-                if (distance(x, y, particles[j].x, particles[j].y) - radius * 2 < 0) {
+                if (dist(x, y, particles[j].x, particles[j].y) - radius * 2 < 0) {
                     x = randomIntFromRange(radius, canvas.width - radius);
                     y = randomIntFromRange(radius, canvas.height - radius);
                     

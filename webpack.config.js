@@ -3,7 +3,9 @@ module.exports = {
   output: {
     filename:"out.js"
   },
-  watch: true,
+  watch: true, devServer:{
+    port: 8080
+  },
   module: {
     loaders: [
       {

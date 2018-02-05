@@ -63,84 +63,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-exports.default = Particle;
-
-var _distance = __webpack_require__(3);
-
-var _distance2 = _interopRequireDefault(_distance);
-
-var _collision = __webpack_require__(4);
-
-var _collision2 = _interopRequireDefault(_collision);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var canvas = document.querySelector('canvas');
-var c = canvas.getContext('2d');
-function Particle(x, y, radius, color) {
-    var _this = this;
-
-    this.x = x;
-    this.y = y;
-    this.velocity = {
-        x: Math.random() - 0.5,
-        y: Math.random() - 0.5
-    };
-    this.radius = radius;
-    this.color = color;
-    this.mass = 2;
-
-    this.update = function (particles) {
-        _this.draw();
-
-        for (var _i = 0; _i < particles.length; _i++) {
-            if (_this === particles[_i]) continue;
-
-            if ((0, _distance2.default)(_this.x, _this.y, particles[_i].x, particles[_i].y) - _this.radius * 2 < 0) {
-                (0, _collision2.default)(_this, particles[_i]);
-            }
-        }
-
-        if (_this.x - _this.radius <= 0 || _this.x + _this.radius >= innerWidth) {
-            _this.velocity.x = -_this.velocity.x;
-        };
-
-        if (_this.y - _this.radius <= 0 || _this.y + _this.radius >= innerHeight) {
-            _this.velocity.y = -_this.velocity.y;
-        };
-
-        if ((0, _distance2.default)(_this.x, _this.y, particles[i].x, particles[i].y) < 100) {
-            console.log('line drawn');
-        }
-
-        _this.x += _this.velocity.x;
-        _this.y += _this.velocity.y;
-    };
-
-    this.draw = function () {
-        c.beginPath();
-        c.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, false);
-        c.strokeStyle = _this.color;
-        c.stroke();
-        c.closePath();
-    };
-}
-
-/***/ }),
-/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -227,11 +154,22 @@ function randomIntFromRange(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-function distance(x1, y1, x2, y2) {
+var dist = function distance(x1, y1, x2, y2) {
     var xDist = x2 - x1;
     var yDist = y2 - y1;
 
     return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+};
+var minDist = 150;
+
+function getLineAlpha(dist, minDist) {
+    //linear y = (ax + b)
+    var a = 1 / minDist * -1,
+        b = 1,
+        //max opacity (1.0)
+    x = dist;
+
+    return a * x + b;
 };
 
 // single particle
@@ -257,22 +195,25 @@ function Particle(x, y, radius, color) {
             if (_this === particles[i]) continue;
 
             //collision check
-
-            if (distance(_this.x, _this.y, particles[i].x, particles[i].y) - _this.radius * 2 < 0) {
+            if (dist(_this.x, _this.y, particles[i].x, particles[i].y) - _this.radius * 2 < 0) {
                 resolveCollision(_this, particles[i]);
             }
 
-            // drawing lines? - not working properly
-
-            if (distance(_this.x, _this.y, particles[i].x, particles[i].y) < 150) {
-
+            // drawing lines
+            var distance = dist(_this.x, _this.y, particles[i].x, particles[i].y);
+            if (distance < 150) {
+                c.beginPath();
+                c.strokeStyle = 'rgba(255, 255, 255, ' + getLineAlpha(distance, minDist) + ')';
+                // c.globalAlpha = getLineAlpha(distance, minDist);
+                c.moveTo(_this.x, _this.y);
                 c.lineTo(particles[i].x, particles[i].y);
-                c.lineWidth = 1;
-                c.strokeStyle = "red";
+                c.lineWidth = 2;
                 c.stroke();
                 c.closePath();
             };
         }
+
+        // protection from leaving the canvas
 
         if (_this.x - _this.radius <= 0 || _this.x + _this.radius >= innerWidth) {
             _this.velocity.x = -_this.velocity.x;
@@ -295,10 +236,13 @@ function Particle(x, y, radius, color) {
     };
 }
 
+// creating varoius particles
+
 var particles = void 0;
 
 function init() {
     particles = [];
+    var canvas = document.querySelector('canvas');
 
     for (var i = 0; i < 30; i++) {
         var radius = (Math.random() + 1) * 10;
@@ -308,7 +252,7 @@ function init() {
 
         if (i !== 0) {
             for (var j = 0; j < particles.length; j++) {
-                if (distance(x, y, particles[j].x, particles[j].y) - radius * 2 < 0) {
+                if (dist(x, y, particles[j].x, particles[j].y) - radius * 2 < 0) {
                     x = randomIntFromRange(radius, canvas.width - radius);
                     y = randomIntFromRange(radius, canvas.height - radius);
 
@@ -334,15 +278,7 @@ init();
 animate();
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(1);
-module.exports = __webpack_require__(0);
-
-
-/***/ }),
-/* 3 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -351,16 +287,71 @@ module.exports = __webpack_require__(0);
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.default = distance;
-function distance(x1, y1, x2, y2) {
-    var xDist = x2 - x1;
-    var yDist = y2 - y1;
+exports.default = Particle;
 
-    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-};
+var _distance = __webpack_require__(3);
+
+var _distance2 = _interopRequireDefault(_distance);
+
+var _collision = __webpack_require__(2);
+
+var _collision2 = _interopRequireDefault(_collision);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var canvas = document.querySelector('canvas');
+var c = canvas.getContext('2d');
+function Particle(x, y, radius, color) {
+    var _this = this;
+
+    this.x = x;
+    this.y = y;
+    this.velocity = {
+        x: Math.random() - 0.5,
+        y: Math.random() - 0.5
+    };
+    this.radius = radius;
+    this.color = color;
+    this.mass = 2;
+
+    this.update = function (particles) {
+        _this.draw();
+
+        for (var _i = 0; _i < particles.length; _i++) {
+            if (_this === particles[_i]) continue;
+
+            if ((0, _distance2.default)(_this.x, _this.y, particles[_i].x, particles[_i].y) - _this.radius * 2 < 0) {
+                (0, _collision2.default)(_this, particles[_i]);
+            }
+        }
+
+        if (_this.x - _this.radius <= 0 || _this.x + _this.radius >= innerWidth) {
+            _this.velocity.x = -_this.velocity.x;
+        };
+
+        if (_this.y - _this.radius <= 0 || _this.y + _this.radius >= innerHeight) {
+            _this.velocity.y = -_this.velocity.y;
+        };
+
+        if ((0, _distance2.default)(_this.x, _this.y, particles[i].x, particles[i].y) < 100) {
+            console.log('line drawn');
+        }
+
+        _this.x += _this.velocity.x;
+        _this.y += _this.velocity.y;
+    };
+
+    this.draw = function () {
+        c.beginPath();
+        c.arc(_this.x, _this.y, _this.radius, 0, Math.PI * 2, false);
+        c.strokeStyle = _this.color;
+        c.stroke();
+        c.closePath();
+    };
+}
 
 /***/ }),
-/* 4 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -435,6 +426,32 @@ function resolveCollision(particle, otherParticle) {
         otherParticle.velocity.y = vFinal2.y;
     }
 }
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.default = distance;
+function distance(x1, y1, x2, y2) {
+    var xDist = x2 - x1;
+    var yDist = y2 - y1;
+
+    return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
+};
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(0);
+module.exports = __webpack_require__(1);
+
 
 /***/ })
 /******/ ]);
