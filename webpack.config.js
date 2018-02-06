@@ -3,9 +3,7 @@ module.exports = {
   output: {
     filename:"out.js"
   },
-  watch: true, devServer:{
-    port: 8080
-  },
+  watch: true,
   module: {
     loaders: [
       {
@@ -15,10 +13,6 @@ module.exports = {
         query: {
           presets: ["es2015"]
         }
-      },
-      {
-        test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader']
       }
     ]
   }

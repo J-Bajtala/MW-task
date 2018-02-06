@@ -1,23 +1,18 @@
 {
   "name": "testproject",
   "version": "1.0.0",
-  "description": "> Odpowiedzi wpisz w odpowiednich plikach, chyba że treść polecenia wskazuje inaczej.\r Pamiętaj, żeby oddzielać ćwiczenia komentarzami i pisać czytelny, dobrze sformatowany kod.\r Jeśli  polecenie w zadaniach brzmi: \"Stwórz nową funkcję, w której wykonasz te czynności\" to znaczy, że\r należy stworzyć funkcję. Nawet jeśli treści zadań są mało skomplikowane\r ucz się używać funkcji.",
+  "description": "MW Task",
   "main": "webpack.config.js",
   "dependencies": {
     "babel-core": "^6.24.1",
     "babel-loader": "^7.0.0",
     "babel-preset-es2015": "^6.24.1",
-    "css-loader": "^0.28.4",
-    "node-sass": "^4.5.3",
-    "sass-loader": "^6.0.5",
-    "style-loader": "^0.18.2",
-    "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
-  },
+    "webpack": "^2.6.1"
+    },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "./node_modules/.bin/webpack && webpack-dev-server"
+    "start": "./node_modules/.bin/webpack"
   },
   "author": "",
   "license": "ISC"
